@@ -4,15 +4,17 @@
 		:ui="{ left: 'pointer-events-auto', right: 'pointer-events-auto' }"
 	>
 		<template #right>
-			<UColorModeButton />
+			<slot name="right">
+				<UColorModeButton />
 
-			<UButton
-				color="neutral"
-				variant="ghost"
-				icon="i-lucide-plus"
-				to="/"
-				class="lg:hidden"
-			/>
+				<UButton
+					color="neutral"
+					variant="ghost"
+					icon="i-lucide-plus"
+					to="/"
+					class="lg:hidden"
+				/>
+			</slot>
 		</template>
 	</UDashboardNavbar>
 </template>

@@ -1,4 +1,3 @@
-// auth.d.ts
 declare module '#auth-utils' {
 	interface User {
 		id: string
@@ -9,6 +8,20 @@ declare module '#auth-utils' {
 		provider: 'github'
 		providerId: number
 	}
+
+	interface UserSession {
+		user?: User
+		twitter?: {
+			accessToken: string
+			accessSecret: string
+			userId: string
+			screenName: string
+		}
+		twitterOAuth?: {
+			token: string
+			secret: string
+		}
+	}
 }
 
-export {}
+export { }

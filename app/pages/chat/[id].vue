@@ -1,7 +1,30 @@
 <template>
 	<UDashboardPanel id="chat" class="relative" :ui="{ body: 'p-0 sm:p-0' }">
 		<template #header>
-			<DashboardNavbar />
+			<DashboardNavbar>
+				<template #right>
+					<!-- Twitter Connect Button -->
+					<UButton
+						v-if="!twitter.isConnected.value"
+						color="blue"
+						variant="soft"
+						icon="i-simple-icons-twitter"
+						:loading="connectingTwitter"
+						@click="connectToTwitter"
+					>
+						Connect Twitter
+					</UButton>
+					<div
+						v-else
+						class="flex items-center gap-2 text-sm text-green-600 dark:text-green-400"
+					>
+						<UIcon name="i-lucide-check-circle" class="w-4 h-4" />
+						<span>
+							Twitter Connected
+						</span>
+					</div>
+				</template>
+			</DashboardNavbar>
 		</template>
 
 		<template #body>
@@ -36,6 +59,21 @@
 					</template>
 				</UChatMessages>
 
+				<!-- Twitter Profile Form -->
+				<TwitterProfileForm
+					v-if="showTwitterForm"
+					@submit="handleProfileSubmit"
+				/>
+
+				<!-- Twitter Post Selector -->
+				<TwitterPostSelector
+					v-if="showPostSelector"
+					:posts="generatedPosts"
+					:posting="postingToTwitter"
+					@select="handlePostSelect"
+					@regenerate="handleRegenerate"
+				/>
+
 				<UChatPrompt
 					v-model="input"
 					:error="chat.error"
@@ -66,7 +104,10 @@ import { useClipboard } from '@vueuse/core'
 import type { UIMessage } from 'ai'
 import { DefaultChatTransport } from 'ai'
 import type { DefineComponent } from 'vue'
+import type { TwitterProfile } from '../../../shared/types/twitter'
 import ProseStreamPre from '../../components/prose/PreStream.vue'
+import TwitterPostSelector from '../../components/TwitterPostSelector.vue'
+import TwitterProfileForm from '../../components/TwitterProfileForm.vue'
 
 const components = {
 	pre: ProseStreamPre as unknown as DefineComponent
@@ -76,6 +117,15 @@ const route = useRoute()
 const toast = useToast()
 const clipboard = useClipboard()
 const { model } = useModels()
+
+// Twitter functionality
+const twitter = useTwitter()
+const connectingTwitter = ref(false)
+const showTwitterForm = ref(false)
+const showPostSelector = ref(false)
+const generatedPosts = ref<string[]>([])
+const postingToTwitter = ref(false)
+const currentProfile = ref<TwitterProfile | null>(null)
 
 const { data } = await useFetch(`/api/chats/${route.params.id}`, {
 	cache: 'force-cache'
@@ -112,6 +162,93 @@ const chat = new Chat({
 	}
 })
 
+// Twitter functions
+async function connectToTwitter() {
+	connectingTwitter.value = true
+	try {
+		await twitter.connectTwitter()
+	} catch {
+		toast.add({
+			description: 'Failed to connect to Twitter',
+			icon: 'i-lucide-alert-circle',
+			color: 'error'
+		})
+	} finally {
+		connectingTwitter.value = false
+	}
+}
+
+// Watch for Twitter connection status
+watchEffect(() => {
+	if (twitter.isConnected.value && !currentProfile.value) {
+		showTwitterForm.value = true
+	}
+})
+
+async function handleProfileSubmit(profile: TwitterProfile) {
+	currentProfile.value = profile
+	twitter.updateProfile(profile)
+	showTwitterForm.value = false
+
+	// Generate AI posts with enhanced system prompt
+	const systemPrompt = twitter.generateSystemPrompt(profile)
+
+	chat.sendMessage({
+		text: systemPrompt
+	})
+
+	// Wait for AI response and parse it
+	// We'll watch for new messages instead of using the private onFinish
+	watch(() => chat.messages.length, () => {
+		const lastMessage = chat.messages[chat.messages.length - 1]
+		if (lastMessage?.role === 'assistant' && currentProfile.value) {
+			const textContent = getTextFromMessage(lastMessage)
+			const posts = twitter.parseAIResponse(textContent)
+
+			if (posts.length > 0) {
+				generatedPosts.value = posts
+				showPostSelector.value = true
+			}
+		}
+	})
+}
+
+async function handlePostSelect(post: string) {
+	postingToTwitter.value = true
+
+	try {
+		await twitter.postToTwitter(post)
+
+		toast.add({
+			description: 'Successfully posted to Twitter!',
+			icon: 'i-lucide-check-circle',
+			color: 'success'
+		})
+
+		// Add success message to chat
+		chat.sendMessage({
+			text: `✅ Posted to Twitter: "${post}"`
+		})
+
+		showPostSelector.value = false
+		generatedPosts.value = []
+	} catch {
+		toast.add({
+			description: 'Failed to post to Twitter',
+			icon: 'i-lucide-alert-circle',
+			color: 'error'
+		})
+	} finally {
+		postingToTwitter.value = false
+	}
+}
+
+function handleRegenerate() {
+	if (currentProfile.value) {
+		handleProfileSubmit(currentProfile.value)
+	}
+}
+
 function handleSubmit(e: Event) {
 	e.preventDefault()
 	if (input.value.trim()) {
@@ -138,5 +275,8 @@ onMounted(() => {
 	if (data.value?.messages.length === 1) {
 		chat.regenerate()
 	}
+
+	// Refresh Twitter session on mount
+	twitter.refreshSession()
 })
 </script>

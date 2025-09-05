@@ -240,7 +240,7 @@ NUXT_OAUTH_GITHUB_CLIENT_SECRET="your-github-oauth-secret"
 # AI Gateway
 AI_GATEWAY_API_KEY="your-vercel-ai-gateway-key"
 
-# Twitter API (for future integration)
+# Twitter API
 TWITTER_API_KEY=""
 TWITTER_API_SECRET=""
 TWITTER_ACCESS_TOKEN=""
