@@ -59,25 +59,28 @@
 					</template>
 				</UChatMessages>
 
-				<div
-					v-if="showTwitterForm || showPostSelector"
-					class="absolute inset-0 flex justify-center items-center bg-accented/15 backdrop-blur-sm"
+				<!-- Twitter Profile Modal -->
+				<UModal
+					v-model:open="showTwitterForm"
+					title="Configure Your Music Profile"
+					:ui="{ body: 'p-0 sm:p-0' }"
 				>
-					<!-- Twitter Profile Form -->
-					<TwitterProfileForm
-						v-if="showTwitterForm"
-						@submit="handleProfileSubmit"
-					/>
+					<TwitterProfileForm @submit="handleProfileSubmit" />
+				</UModal>
 
-					<!-- Twitter Post Selector -->
+				<!-- Twitter Post Selector Modal -->
+				<UModal
+					v-model:open="showPostSelector"
+					title="Select a Tweet to Post"
+					:ui="{ body: 'p-0 sm:p-0' }"
+				>
 					<TwitterPostSelector
-						v-if="showPostSelector"
 						:posts="generatedPosts"
 						:posting="postingToTwitter"
 						@select="handlePostSelect"
 						@regenerate="handleRegenerate"
 					/>
-				</div>
+				</UModal>
 
 				<UChatPrompt
 					v-model="input"
@@ -138,6 +141,7 @@ const { model } = useModels()
 const twitter = useTwitter()
 const connectingTwitter = ref(false)
 const showTwitterForm = ref(false)
+const showTwitterButton = ref(false)
 const showPostSelector = ref(false)
 const generatedPosts = ref<string[]>([])
 const postingToTwitter = ref(false)
@@ -197,7 +201,7 @@ async function connectToTwitter() {
 // Watch for Twitter connection status
 watchEffect(() => {
 	if (twitter.isConnected.value && !currentProfile.value) {
-		showTwitterForm.value = true
+		showTwitterButton.value = true
 	}
 })
 
