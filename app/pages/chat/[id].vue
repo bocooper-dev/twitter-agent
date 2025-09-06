@@ -28,7 +28,7 @@
 		</template>
 
 		<template #body>
-			<UContainer class="flex-1 flex flex-col gap-4 sm:gap-6">
+			<UContainer class="relative flex-1 flex flex-col gap-4 sm:gap-6">
 				<UChatMessages
 					:messages="chat.messages"
 					:status="chat.status"
@@ -59,20 +59,25 @@
 					</template>
 				</UChatMessages>
 
-				<!-- Twitter Profile Form -->
-				<TwitterProfileForm
-					v-if="showTwitterForm"
-					@submit="handleProfileSubmit"
-				/>
+				<div
+					v-if="showTwitterForm || showPostSelector"
+					class="absolute inset-0 flex justify-center items-center bg-accented/15 backdrop-blur-sm"
+				>
+					<!-- Twitter Profile Form -->
+					<TwitterProfileForm
+						v-if="showTwitterForm"
+						@submit="handleProfileSubmit"
+					/>
 
-				<!-- Twitter Post Selector -->
-				<TwitterPostSelector
-					v-if="showPostSelector"
-					:posts="generatedPosts"
-					:posting="postingToTwitter"
-					@select="handlePostSelect"
-					@regenerate="handleRegenerate"
-				/>
+					<!-- Twitter Post Selector -->
+					<TwitterPostSelector
+						v-if="showPostSelector"
+						:posts="generatedPosts"
+						:posting="postingToTwitter"
+						@select="handlePostSelect"
+						@regenerate="handleRegenerate"
+					/>
+				</div>
 
 				<UChatPrompt
 					v-model="input"
@@ -89,7 +94,18 @@
 					/>
 
 					<template #footer>
-						<ModelSelect v-model="model" />
+						<div class="w-full flex items-between gap-4">
+							<ModelSelect v-model="model" />
+							<UButton
+								v-if="!showTwitterForm && !showPostSelector /* && twitter.isConnected.value */"
+								variant="solid"
+								color="primary"
+								icon="i-simple-icons-twitter"
+								label="Birdy won't tweet? Let me chirp!"
+								class="ml-auto"
+								@click="showTwitterForm = true"
+							/>
+						</div>
 					</template>
 				</UChatPrompt>
 			</UContainer>

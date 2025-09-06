@@ -9,74 +9,85 @@
 			</div>
 		</template>
 
-		<form
-			class="space-y-6"
+		<UForm
+			class="space-y-6 min-w-xs"
+			:schema="schema"
+			:state="state"
 			@submit.prevent="submitForm"
 		>
-			<UFormGroup
+			<UFormField
 				label="Music Genre"
 				required
 			>
 				<USelect
-					v-model="formData.genre"
-					:options="genreOptions"
+					v-model="state.genre"
+					:items="genreOptions"
 					placeholder="Select your music genre"
 				/>
-			</UFormGroup>
+			</UFormField>
 
-			<UFormGroup
-				label="Age"
+			<UFormField
+				label="Your Age (Mentally)"
 				required
 			>
-				<UInput
-					v-model.number="formData.age"
-					type="number"
-					min="16"
-					max="100"
-					placeholder="25"
-				/>
-			</UFormGroup>
+				<div class="flex items-center gap-2">
+					<UInput
+						v-model.number="state.age"
+						type="number"
+						min="16"
+						max="100"
+						placeholder="25"
+					/>
+					<div
+						v-if="state.age > 60"
+						class="text-sm text-gray-500"
+					>
+						Damn gramps, get off my lawn!
+					</div>
+				</div>
+			</UFormField>
 
-			<UFormGroup
-				label="Artist Type"
+			<UFormField
+				label="Project Size"
 				required
 			>
 				<URadioGroup
-					v-model="formData.artistType"
-					:options="artistTypeOptions"
+					v-model="state.artistType"
+					:items="artistTypeOptions"
 				/>
-			</UFormGroup>
+			</UFormField>
 
-			<UFormGroup
+			<UFormField
 				label="Instruments/Role"
 				required
 			>
 				<UCheckboxGroup
-					v-model="formData.instruments"
-					:options="instrumentOptions"
+					v-model="state.instruments"
+					:items="instrumentOptions"
 				/>
-			</UFormGroup>
+			</UFormField>
 
-			<UFormGroup
+			<UFormField
 				label="Target Audience"
 				required
 			>
 				<USelect
-					v-model="formData.audience"
-					:options="audienceOptions"
+					v-model="state.audience"
+					:items="audienceOptions"
 					placeholder="Select your target audience"
 				/>
-			</UFormGroup>
+			</UFormField>
 
-			<UFormGroup
+			<UFormField
 				label="Voice Tone"
 				required
 			>
-				<URadioGroup
-					v-model="formData.tone"
-					:options="toneOptions"
+				<USelect
+					v-model="state.tone"
+					:items="toneOptions"
+					placeholder="What mood do you want to convey?"
 				/>
-			</UFormGroup>
+			</UFormField>
 
 			<UButton
 				type="submit"
@@ -85,44 +96,41 @@
 			>
 				Generate Twitter Posts
 			</UButton>
-		</form>
+		</UForm>
 	</UCard>
 </template>
 
 <script setup lang="ts">
+import * as z from 'zod'
 import type { TwitterProfile } from '../../shared/types/twitter'
 
 const emit = defineEmits<{
 	submit: [profile: TwitterProfile]
 }>()
 
-const loading = ref(false)
-
-const formData = reactive<TwitterProfile>({
-	genre: '',
-	age: 25,
-	artistType: 'solo',
-	instruments: [],
-	audience: '',
-	tone: 'professional'
+const schema = z.object({
+	genre: z.string().min(1, 'Genre is required'),
+	age: z.number().min(16, 'Age must be at least 16').max(100, 'Age must be less than 100'),
+	artistType: z.string().min(1, 'Artist type is required'),
+	instruments: z.array(z.string()).min(1, 'Select at least one instrument or role'),
+	audience: z.string().min(1, 'Target audience is required'),
+	tone: z.string().min(1, 'Voice tone is required')
 })
 
-const genreOptions = [
-	'Pop',
-	'Rock',
-	'Hip-Hop',
-	'Electronic/EDM',
-	'Country',
-	'R&B',
-	'Folk',
-	'Jazz',
-	'Reggae',
-	'Alternative',
-	'Indie',
-	'Classical'
-]
+type Schema = z.output<typeof schema>
 
-const artistTypeOptions = [
+const state = reactive<Schema>({
+	genre: '',
+	age: 25,
+	artistType: '',
+	instruments: [],
+	audience: '',
+	tone: ''
+})
+
+const loading = ref(false)
+
+const artistTypeOptions = ref([
 	{
 		value: 'solo',
 		label: 'Solo Artist'
@@ -134,10 +142,41 @@ const artistTypeOptions = [
 	{
 		value: 'duo',
 		label: 'Duo'
+	},
+	{
+		value: '3 or more squirrels in a trench coat',
+		label: '3 or More Squirrels in a Trench Coat'
 	}
-]
+])
 
-const instrumentOptions = [
+const genreOptions = ref([
+	'Pop',
+	'Rock',
+	'Metal',
+	'Hip-Hop',
+	'Electronic/EDM',
+	'Dubstep',
+	'Riddim',
+	'Tearout',
+	'Experimental Bass',
+	'Deep Dub',
+	'Wave/Hardwave',
+	'Trance',
+	'Techno',
+	'Country',
+	'R&B',
+	'Folk',
+	'Jazz',
+	'Reggae',
+	'Alternative',
+	'Indie',
+	'Classical',
+	'Blues',
+	'Punk',
+	'Penis Music'
+])
+
+const instrumentOptions = ref([
 	'Vocals',
 	'Guitar',
 	'Bass',
@@ -147,19 +186,21 @@ const instrumentOptions = [
 	'Producer',
 	'Violin',
 	'Saxophone',
-	'Trumpet'
-]
+	'Trumpet',
+	'Skin Flute'
+])
 
-const audienceOptions = [
+const audienceOptions = ref([
 	'Teens (13-17)',
 	'Young Adults (18-25)',
 	'Adults (26-35)',
 	'Middle-aged (36-50)',
 	'Music Enthusiasts',
-	'General Audience'
-]
+	'General Audience',
+	'Weebs and Furries *UwU senpai* *rrruff* *shits your pants*'
+])
 
-const toneOptions = [
+const toneOptions = ref([
 	{
 		value: 'professional',
 		label: 'Professional'
@@ -171,26 +212,71 @@ const toneOptions = [
 	{
 		value: 'edgy',
 		label: 'Edgy'
+	},
+	{
+		value: 'dramatic',
+		label: 'Dramatic'
+	},
+	{
+		value: 'romantic',
+		label: 'Romantic'
+	},
+	{
+		value: 'whimsical',
+		label: 'Whimsical'
+	},
+	{
+		value: 'quirky',
+		label: 'Quirky'
+	},
+	{
+		value: 'absurd',
+		label: 'Absurd'
+	},
+	{
+		value: 'sarcastic',
+		label: 'Sarcastic'
+	},
+	{
+		value: 'poetic',
+		label: 'Poetic'
+	},
+	{
+		value: 'mysterious',
+		label: 'Mysterious'
+	},
+	{
+		value: 'inspirational',
+		label: 'Inspirational'
+	},
+	{
+		value: 'nostalgic',
+		label: 'Nostalgic'
+	},
+	{
+		value: 'humorous',
+		label: 'Humorous'
+	},
+	{
+		value: 'casual',
+		label: 'Casual'
+	},
+	{
+		value: 'apathetic',
+		label: 'Apathetic'
+	},
+	{
+		value: 'stizzy off the galaxy gas',
+		label: 'Stizzy Off the Galaxy Gas'
 	}
-]
-
-function isFormValid(): boolean {
-	return !!(
-		formData.genre
-		&& formData.age >= 16
-		&& formData.artistType
-		&& formData.instruments.length > 0
-		&& formData.audience
-		&& formData.tone
-	)
-}
+])
 
 async function submitForm() {
-	if (!isFormValid()) return
+	if (!schema.safeParse(state).success) return
 
 	loading.value = true
 	try {
-		emit('submit', { ...formData })
+		emit('submit', { ...(state as TwitterProfile) })
 	} finally {
 		loading.value = false
 	}
