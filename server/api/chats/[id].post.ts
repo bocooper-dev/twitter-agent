@@ -1,8 +1,12 @@
-import {
-	convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, generateText, streamText
-} from 'ai'
 import { gateway } from '@ai-sdk/gateway'
 import type { UIMessage } from 'ai'
+import {
+	convertToModelMessages,
+	createUIMessageStream,
+	createUIMessageStreamResponse,
+	generateText,
+	streamText
+} from 'ai'
 import { z } from 'zod'
 
 defineRouteMeta({
@@ -18,10 +22,11 @@ export default defineEventHandler(async event => {
 	const { id } = getRouterParams(event)
 
 	const {
-		model, messages
+		model, messages, system
 	} = await readValidatedBody(event, z.object({
 		model: z.string(),
-		messages: z.array(z.custom<UIMessage>())
+		messages: z.array(z.custom<UIMessage>()),
+		system: z.string().optional()
 	}).parse)
 
 	const db = useDrizzle()
@@ -41,11 +46,11 @@ export default defineEventHandler(async event => {
 		const { text: title } = await generateText({
 			model: gateway('openai/gpt-5-nano'),
 			system: `You are a title generator for a chat:
-          - Generate a short title based on the first user's message
-          - The title should be less than 30 characters long
-          - The title should be a summary of the user's message
-          - Do not use quotes (' or ") or colons (:) or any other punctuation
-          - Do not use markdown, just plain text`,
+					- Generate a short title based on the first user's message
+					- The title should be less than 30 characters long
+					- The title should be a summary of the user's message
+					- Do not use quotes (' or ") or colons (:) or any other punctuation
+					- Do not use markdown, just plain text`,
 			prompt: JSON.stringify(messages[0])
 		})
 
@@ -62,11 +67,23 @@ export default defineEventHandler(async event => {
 		})
 	}
 
+	// Determine effective system prompt before streaming begins
+	const sessionSystem = (session as any).twitterSystemPrompt as string | undefined
+	const effectiveSystem = system || sessionSystem || 'You are a helpful assistant that can answer questions and help.'
+
+	// If consuming a one-time system prompt from session, clear it now (before headers are sent)
+	if (!system && sessionSystem) {
+		await setUserSession(event, {
+			...session,
+			twitterSystemPrompt: undefined
+		})
+	}
+
 	const stream = createUIMessageStream({
 		execute: ({ writer }) => {
 			const result = streamText({
 				model: gateway(model),
-				system: 'You are a helpful assistant that can answer questions and help.',
+				system: effectiveSystem,
 				messages: convertToModelMessages(messages)
 			})
 

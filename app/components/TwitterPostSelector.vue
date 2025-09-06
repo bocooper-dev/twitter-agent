@@ -1,3 +1,4 @@
+<!-- Add right click context menu UContextMenu to Post Cards. https://ui.nuxt.com/raw/components/context-menu.md -->
 <template>
 	<UCard>
 		<template #header>
@@ -22,9 +23,10 @@
 				@click="selectedIndex = index"
 			>
 				<div class="flex items-start gap-3">
-					<URadio
+					<URadioGroup
 						:model-value="selectedIndex === index"
 						:name="`post-${index}`"
+						:items="[{ label: '', value: true }]"
 						class="mt-1"
 					/>
 					<div class="flex-1">
