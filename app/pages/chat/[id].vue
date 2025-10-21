@@ -196,31 +196,15 @@ const transformedMessages = (data.value.messages || []).map((msg: any) => ({
 	createdAt: new Date(msg.createdAt)
 }))
 
-const hasProfileForm = transformedMessages.some((message: any) =>
-	message.parts?.some((part: any) => part.type === 'twitter_profile_form')
-)
-
-if (!hasProfileForm) {
-	transformedMessages.push({
-		id: `local-twitter-profile-form-${Date.now()}`,
-		role: 'assistant',
-		parts: [
-			{
-				type: 'twitter_profile_form'
-			}
-		],
-		createdAt: new Date()
-	})
-}
-
 const chat = new Chat({
 	id: data.value.id,
 	messages: transformedMessages,
 	transport: new DefaultChatTransport({
 		api: `/api/chats/${data.value.id}`,
-		body: {
-			model: model.value
-		}
+		body: () => ({
+			model: model.value,
+			system: latestSystemPrompt.value || undefined
+		})
 	}),
 	onFinish() {
 		refreshNuxtData('chats')
@@ -257,6 +241,8 @@ function copy(e: MouseEvent, message: UIMessage) {
 }
 
 onMounted(() => {
+	// Auto-regenerate if there's exactly 1 message (initial user message)
+	// This will trigger the server to send the profile form
 	if (data.value?.messages.length === 1) {
 		chat.regenerate()
 	}
@@ -286,14 +272,15 @@ async function handleProfileSubmit(profile: TwitterProfile) {
 	const systemPrompt = twitter.generateSystemPrompt(profile)
 	latestSystemPrompt.value = systemPrompt
 
-	// Save one-time system prompt on server; chat API will consume and clear it
-	await $fetch('/api/twitter/system', {
-		method: 'POST',
-		body: { system: systemPrompt }
-	})
-
 	// Send message to trigger post generation
+	// The system prompt will be sent via the transport body function
 	chat.sendMessage({ text: 'Generate 3 tweet variants.' })
+
+	// Clear the system prompt after sending (it will be used once)
+	// Use a small delay to ensure the message is sent first
+	setTimeout(() => {
+		latestSystemPrompt.value = null
+	}, 100)
 }
 
 async function handlePostSelect(post: string) {
@@ -325,7 +312,17 @@ async function handlePostSelect(post: string) {
 
 function handleRegenerate() {
 	if (currentProfile.value) {
-		handleProfileSubmit(currentProfile.value)
+		// Set the system prompt again before regenerating
+		const systemPrompt = twitter.generateSystemPrompt(currentProfile.value)
+		latestSystemPrompt.value = systemPrompt
+
+		// Send message to trigger post generation
+		chat.sendMessage({ text: 'Generate 3 tweet variants.' })
+
+		// Clear after sending
+		setTimeout(() => {
+			latestSystemPrompt.value = null
+		}, 100)
 	}
 }
 

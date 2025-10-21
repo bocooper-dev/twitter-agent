@@ -1,12 +1,12 @@
 import { gateway } from '@ai-sdk/gateway'
 import type { UIMessage } from 'ai'
 import {
-	convertToModelMessages,
-	createUIMessageStream,
-	createUIMessageStreamResponse,
-	generateObject,
-	generateText,
-	streamText
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  generateObject,
+  generateText,
+  streamText
 } from 'ai'
 import { z } from 'zod'
 
@@ -82,17 +82,66 @@ export default defineEventHandler(async event => {
 	}
 
 	// Determine effective system prompt before streaming begins
-	const sessionSystem = (session as any).twitterSystemPrompt as string | undefined
-	const effectiveSystem = system || sessionSystem || 'You are a helpful assistant that can answer questions and help.'
+	// IMPORTANT: Only use session system prompt if explicitly provided via the system parameter
+	// This prevents old session data from bleeding into new chats
+	const effectiveSystem = system || 'You are a helpful assistant that can answer questions and help.'
 
 	// Check if this is a tweet generation request (has custom system prompt)
-	const isGeneratingTweets = !!(system || sessionSystem)
+	const isGeneratingTweets = !!system
 
-	// If consuming a one-time system prompt from session, clear it now (before headers are sent)
-	if (!system && sessionSystem) {
-		await setUserSession(event, {
-			...session,
-			twitterSystemPrompt: undefined
+	// If using a system prompt, clear any stale session data immediately
+	if (system) {
+		const sessionSystem = (session as any).twitterSystemPrompt as string | undefined
+		if (sessionSystem) {
+			await setUserSession(event, {
+				...session,
+				twitterSystemPrompt: undefined
+			})
+		}
+	}
+
+	// Check if this is a new chat that needs a profile form
+	// If there's only 1 message (the initial user message) and no system prompt, send profile form
+	const needsProfileForm = chat.messages.length === 1 && !system
+
+	if (needsProfileForm) {
+		// Send the Twitter profile form for the user to fill out
+		const stream = createUIMessageStream({
+			execute: ({ writer }) => {
+				writer.write({ type: 'start' })
+				writer.write({
+					type: 'data-twitter_profile_form',
+					data: {}
+				})
+				writer.write({ type: 'finish' })
+			},
+			onFinish: async ({ messages: finishedMessages }) => {
+				if (!finishedMessages.length) {
+					return
+				}
+
+				const normalizedMessages = finishedMessages.map(message => ({
+					...message,
+					parts: message.parts.map(part => {
+						if (part.type === 'data-twitter_profile_form') {
+							return {
+								type: 'twitter_profile_form'
+							}
+						}
+						return part
+					})
+				}))
+
+				await db.insert(tables.messages).values(normalizedMessages.map(message => ({
+					chatId: id as string,
+					role: message.role as 'assistant' | 'user',
+					parts: message.parts
+				})))
+			}
+		})
+
+		return createUIMessageStreamResponse({
+			stream
 		})
 	}
 
