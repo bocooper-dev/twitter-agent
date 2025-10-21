@@ -27,7 +27,7 @@
 					</template>
 				</UChatPrompt>
 
-				<div class="flex flex-wrap gap-2">
+				<!-- <div class="flex flex-wrap gap-2">
 					<UButton
 						v-for="quickChat in quickChats"
 						:key="quickChat.label"
@@ -39,7 +39,7 @@
 						class="rounded-full"
 						@click="createChat(quickChat.label)"
 					/>
-				</div>
+				</div> -->
 			</UContainer>
 		</template>
 	</UDashboardPanel>
@@ -67,26 +67,26 @@ function onSubmit() {
 	createChat(input.value)
 }
 
-const quickChats = [
-	{
-		label: 'Why use Nuxt UI?',
-		icon: 'i-logos-nuxt-icon'
-	},
-	{
-		label: 'Help me create a Vue composable',
-		icon: 'i-logos-vue'
-	},
-	{
-		label: 'Tell me more about UnJS',
-		icon: 'i-logos-unjs'
-	},
-	{
-		label: 'Why should I consider VueUse?',
-		icon: 'i-logos-vueuse'
-	},
-	{
-		label: 'Tailwind CSS best practices',
-		icon: 'i-logos-tailwindcss-icon'
-	}
-]
+// const quickChats = [
+// 	{
+// 		label: 'Why use Nuxt UI?',
+// 		icon: 'i-logos-nuxt-icon'
+// 	},
+// 	{
+// 		label: 'Help me create a Vue composable',
+// 		icon: 'i-logos-vue'
+// 	},
+// 	{
+// 		label: 'Tell me more about UnJS',
+// 		icon: 'i-logos-unjs'
+// 	},
+// 	{
+// 		label: 'Why should I consider VueUse?',
+// 		icon: 'i-logos-vueuse'
+// 	},
+// 	{
+// 		label: 'Tailwind CSS best practices',
+// 		icon: 'i-logos-tailwindcss-icon'
+// 	}
+// ]
 </script>
