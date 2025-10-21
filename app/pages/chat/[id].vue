@@ -33,12 +33,13 @@
 					:messages="chat.messages"
 					:status="chat.status"
 					:assistant="{ actions: [{ label: 'Copy', icon: copied ? 'i-lucide-copy-check' : 'i-lucide-copy', onClick: copy }] }"
-					class="lg:pt-(--ui-header-height) pb-4 sm:pb-6"
+					class="lg:pt-(--ui-header-height) pb-4 sm:gap-6"
 					:spacing-offset="160"
 				>
 					<template #content="{ message }">
 						<div class="space-y-4">
 							<template v-for="(part, index) in message.parts" :key="`${part.type}-${index}-${message.id}`">
+								<!-- Reasoning indicator -->
 								<UButton
 									v-if="part.type === 'reasoning' && part.state !== 'done'"
 									label="Thinking..."
@@ -47,8 +48,44 @@
 									class="p-0"
 									loading
 								/>
+
+								<!-- Twitter Profile Form Card -->
+								<TwitterProfileForm
+									v-else-if="isPart(part, 'twitter_profile_form')"
+									@submit="handleProfileSubmit"
+								/>
+
+								<!-- Twitter Post Selector Card with System Prompt Inspector -->
+								<SystemPromptInspector
+									v-else-if="isPart(part, 'twitter_post_selector')"
+									:posts="getPartData(part).posts || []"
+									:posting="postingToTwitter"
+									:prompt="latestSystemPrompt"
+									@select="handlePostSelect"
+									@regenerate="handleRegenerate"
+								/>
+
+								<!-- Twitter Post Card (single post) -->
+								<UCard v-else-if="isPart(part, 'twitter_post_card')">
+									<div class="space-y-2">
+										<div class="flex items-center justify-between">
+											<span class="text-sm font-medium text-gray-600">
+												Variant {{ getPartData(part).variant ?? 1 }}
+											</span>
+											<span class="text-xs text-gray-500">
+												{{ (getPartData(part).content ?? '').length }}/280
+											</span>
+										</div>
+										<p class="text-sm">
+											{{ getPartData(part).content ?? '' }}
+										</p>
+									</div>
+								</UCard>
 							</template>
+
+							<!-- Standard text content -->
 							<MDCCached
+								v-if="hasTextContent(message)"
 								:value="getTextFromMessage(message)"
 								:cache-key="message.id"
 								unwrap="p"
@@ -58,42 +95,6 @@
 						</div>
 					</template>
 				</UChatMessages>
-
-				<!-- Inline Twitter Profile Config Card -->
-				<TwitterProfileForm
-					v-if="showTwitterForm"
-					@submit="handleProfileSubmit"
-				/>
-				<!-- Top actions: Choose your post + Inspect system prompt -->
-				<div class="flex flex-col gap-3">
-					<TwitterPostSelector
-						v-if="showPostSelector && generatedPosts.length"
-						:posts="generatedPosts"
-						:posting="postingToTwitter"
-						@select="handlePostSelect"
-						@regenerate="handleRegenerate"
-					/>
-
-					<div v-if="hasNewSystemPrompt || generatedPosts.length">
-						<div class="flex items-center gap-2">
-							<UButton
-								variant="ghost"
-								color="neutral"
-								icon="i-lucide-eye"
-								label="Inspect system prompt"
-								@click="showSystemPrompt = !showSystemPrompt"
-							/>
-							<span v-if="showSystemPrompt" class="text-xs text-muted">
-								(debug)
-							</span>
-						</div>
-						<UCard v-if="showSystemPrompt" class="mt-2">
-							<pre class="text-xs whitespace-pre-wrap">
-								{{ newSystemPrompt }}
-							</pre>
-						</UCard>
-					</div>
-				</div>
 
 				<UChatPrompt
 					v-model="input"
@@ -110,17 +111,7 @@
 					/>
 
 					<template #footer>
-						<div class="w-full flex items-between gap-4">
-							<ModelSelect v-model="model" />
-							<UButton
-								variant="solid"
-								color="primary"
-								icon="i-simple-icons-twitter"
-								label="Bird up pimpin'"
-								class="ml-auto"
-								@click="showTwitterForm = true"
-							/>
-						</div>
+						<ModelSelect v-model="model" />
 					</template>
 				</UChatPrompt>
 			</UContainer>
@@ -137,7 +128,7 @@ import { DefaultChatTransport } from 'ai'
 import type { DefineComponent } from 'vue'
 import type { TwitterProfile } from '../../../shared/types/twitter'
 import ProseStreamPre from '../../components/prose/PreStream.vue'
-import TwitterPostSelector from '../../components/TwitterPostSelector.vue'
+import SystemPromptInspector from '../../components/SystemPromptInspector.vue'
 import TwitterProfileForm from '../../components/TwitterProfileForm.vue'
 
 const components = {
@@ -152,83 +143,75 @@ const { model } = useModels()
 // Twitter functionality
 const twitter = useTwitter()
 const connectingTwitter = ref(false)
-const showTwitterForm = ref(false)
-const showPostSelector = ref(false)
-const generatedPosts = ref<string[]>([])
 const postingToTwitter = ref(false)
 const currentProfile = ref<TwitterProfile | null>(null)
-const showSystemPrompt = ref(false)
-const newSystemPrompt = ref('')
-const hasNewSystemPrompt = computed(() => newSystemPrompt.value)
+const latestSystemPrompt = ref<string | null>(null)
+const input = ref('')
 
 const { data } = await useFetch(`/api/chats/${route.params.id}`, {
 	cache: 'force-cache'
 })
 
 if (!data.value) {
-	throw createError({ statusCode: 404,
+	throw createError({
+		statusCode: 404,
 		statusMessage: 'Chat not found',
-		fatal: true })
+		fatal: true
+	})
 }
 
-const input = ref('')
+function normalizePart(part: any) {
+	if (part && typeof part.type === 'string' && part.type.startsWith('data-')) {
+		return {
+			...part,
+			type: part.type.slice(5)
+		}
+	}
 
-// Debug: Log the initial messages
-console.log('Initial messages from database:', data.value.messages)
+	return part
+}
+
+function isPart(part: any, type: string) {
+	if (!part || typeof part.type !== 'string') {
+		return false
+	}
+
+	return part.type === type || part.type === `data-${type}`
+}
+
+function getPartData(part: any) {
+	return part?.data ?? {}
+}
 
 // Transform messages for Chat component
-const transformedMessages = (data.value.messages || []).map((msg: any) => {
-	console.log('Transforming message:', msg)
-	return {
-		id: msg.id,
-		role: msg.role,
-		parts: msg.parts || [
+const transformedMessages = (data.value.messages || []).map((msg: any) => ({
+	id: msg.id,
+	role: msg.role,
+	parts: (msg.parts || [
+		{
+			type: 'text',
+			text: msg.content || ''
+		}
+	]).map(normalizePart),
+	createdAt: new Date(msg.createdAt)
+}))
+
+const hasProfileForm = transformedMessages.some((message: any) =>
+	message.parts?.some((part: any) => part.type === 'twitter_profile_form')
+)
+
+if (!hasProfileForm) {
+	transformedMessages.push({
+		id: `local-twitter-profile-form-${Date.now()}`,
+		role: 'assistant',
+		parts: [
 			{
-				type: 'text',
-				text: msg.content || ''
+				type: 'twitter_profile_form'
 			}
 		],
-		createdAt: new Date(msg.createdAt)
-	}
-})
-
-console.log('Transformed messages:', transformedMessages)
-
-/*
-const chat = new Chat({
-	id: data.value.id,
-	messages: data.value.messages || [],
-	transport: new DefaultChatTransport({
-		api: `/api/chats/${data.value.id}`,
-		body: {
-			model: model.value
-		}
-	}),
-	onFinish() {
-		refreshNuxtData('chats')
-		// Also try parsing posts here after the assistant finishes
-		const last = chat.messages[chat.messages.length - 1]
-		if (last?.role === 'assistant' && currentProfile.value) {
-			const text = getTextFromMessage(last)
-
-			const posts = twitter.parseAIResponse(text)
-			if (posts.length > 0) {
-				generatedPosts.value = posts
-				showPostSelector.value = true
-			}
-		}
-	},
-	onError(error) {
-		const { message } = typeof error.message === 'string' && error.message[0] === '{' ? JSON.parse(error.message) : error
-		toast.add({
-			description: message,
-			icon: 'i-lucide-alert-circle',
-			color: 'error',
-			duration: 0
-		})
-	}
-})
-*/
+		createdAt: new Date()
+	})
+}
 
 const chat = new Chat({
 	id: data.value.id,
@@ -241,17 +224,6 @@ const chat = new Chat({
 	}),
 	onFinish() {
 		refreshNuxtData('chats')
-		// Also try parsing posts here after the assistant finishes
-		const last = chat.messages[chat.messages.length - 1]
-		if (last?.role === 'assistant' && currentProfile.value) {
-			const text = getTextFromMessage(last)
-
-			const posts = twitter.parseAIResponse(text)
-			if (posts.length > 0) {
-				generatedPosts.value = posts
-				showPostSelector.value = true
-			}
-		}
 	},
 	onError(error) {
 		const { message } = typeof error.message === 'string' && error.message[0] === '{' ? JSON.parse(error.message) : error
@@ -278,9 +250,7 @@ const copied = ref(false)
 
 function copy(e: MouseEvent, message: UIMessage) {
 	clipboard.copy(getTextFromMessage(message))
-
 	copied.value = true
-
 	setTimeout(() => {
 		copied.value = false
 	}, 2000)
@@ -291,12 +261,6 @@ onMounted(() => {
 		chat.regenerate()
 	}
 })
-
-// Debug: Watch for changes in chat messages
-watch(() => chat.messages, newMessages => {
-	console.log('Chat messages updated:', newMessages)
-}, { deep: true,
-	immediate: true })
 
 // Twitter functions
 async function connectToTwitter() {
@@ -315,42 +279,21 @@ async function connectToTwitter() {
 }
 
 async function handleProfileSubmit(profile: TwitterProfile) {
-	console.log('handleProfileSubmit - System Prompt:', profile)
-
 	currentProfile.value = profile
 	twitter.updateProfile(profile)
-	showTwitterForm.value = false
 
 	// Generate AI posts with enhanced system prompt
 	const systemPrompt = twitter.generateSystemPrompt(profile)
+	latestSystemPrompt.value = systemPrompt
 
-	newSystemPrompt.value = systemPrompt
 	// Save one-time system prompt on server; chat API will consume and clear it
 	await $fetch('/api/twitter/system', {
 		method: 'POST',
 		body: { system: systemPrompt }
 	})
+
+	// Send message to trigger post generation
 	chat.sendMessage({ text: 'Generate 3 tweet variants.' })
-
-	// Watch the last assistant message text; when it includes variants, parse once and open selector
-	const stopWatch = watch(
-		() => {
-			const last = chat.messages[chat.messages.length - 1]
-			return last?.role === 'assistant' ? getTextFromMessage(last) : ''
-		},
-		text => {
-			if (!text || !currentProfile.value) return
-			const posts = twitter.parseAIResponse(text)
-			if (posts.length > 0) {
-				generatedPosts.value = posts
-				showPostSelector.value = true
-
-				// Stop watching after first successful parse
-				stopWatch()
-			}
-		},
-		{ flush: 'post' }
-	)
 }
 
 async function handlePostSelect(post: string) {
@@ -369,9 +312,6 @@ async function handlePostSelect(post: string) {
 		chat.sendMessage({
 			text: `✅ Posted to Twitter: "${post}"`
 		})
-
-		showPostSelector.value = false
-		generatedPosts.value = []
 	} catch {
 		toast.add({
 			description: 'Failed to post to Twitter',
@@ -387,5 +327,12 @@ function handleRegenerate() {
 	if (currentProfile.value) {
 		handleProfileSubmit(currentProfile.value)
 	}
+}
+
+// Helper: check if message has text content to render
+function hasTextContent(message: UIMessage): boolean {
+	return message.parts?.some((part: any) =>
+		part.type === 'text' && part.text
+	) ?? false
 }
 </script>

@@ -144,8 +144,8 @@ const artistTypeOptions = ref([
 		label: 'Duo'
 	},
 	{
-		value: '3 or more squirrels in a trench coat',
-		label: '3 or More Squirrels in a Trench Coat'
+		value: '3 squirrels in a trench coat',
+		label: '3 Squirrels in a Trench Coat'
 	}
 ])
 
@@ -156,11 +156,6 @@ const genreOptions = ref([
 	'Hip-Hop',
 	'Electronic/EDM',
 	'Dubstep',
-	'Riddim',
-	'Tearout',
-	'Experimental Bass',
-	'Deep Dub',
-	'Wave/Hardwave',
 	'Trance',
 	'Techno',
 	'Country',
@@ -172,8 +167,7 @@ const genreOptions = ref([
 	'Indie',
 	'Classical',
 	'Blues',
-	'Punk',
-	'Penis Music'
+	'Punk'
 ])
 
 const instrumentOptions = ref([
@@ -186,8 +180,7 @@ const instrumentOptions = ref([
 	'Producer',
 	'Violin',
 	'Saxophone',
-	'Trumpet',
-	'Skin Flute'
+	'Trumpet'
 ])
 
 const audienceOptions = ref([
@@ -197,7 +190,7 @@ const audienceOptions = ref([
 	'Middle-aged (36-50)',
 	'Music Enthusiasts',
 	'General Audience',
-	'Weebs and Furries *UwU senpai* *rrruff* *shits your pants*'
+	'Vampires'
 ])
 
 const toneOptions = ref([
@@ -264,10 +257,6 @@ const toneOptions = ref([
 	{
 		value: 'apathetic',
 		label: 'Apathetic'
-	},
-	{
-		value: 'stizzy off the galaxy gas',
-		label: 'Stizzy Off the Galaxy Gas'
 	}
 ])
 

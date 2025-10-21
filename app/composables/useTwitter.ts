@@ -1,6 +1,6 @@
 import type {
-  TwitterConfig,
-  TwitterProfile
+	TwitterConfig,
+	TwitterProfile
 } from '../../shared/types/twitter'
 
 export function useTwitter() {
@@ -101,33 +101,31 @@ export function useTwitter() {
 						? 'Relatable musician humor'
 						: profile.tone === 'edgy'
 							? 'Bold artistic statement'
-							: profile.tone === 'stizzy off the galaxy gas'
-								? 'Completely unhinged creative chaos'
-								: profile.tone === 'dramatic'
-									? 'Intense emotional revelation'
-									: profile.tone === 'romantic'
-										? 'Heartfelt love declaration'
-										: profile.tone === 'whimsical'
-											? 'Magical creative daydream'
-											: profile.tone === 'quirky'
-												? 'Oddly charming observation'
-												: profile.tone === 'absurd'
-													? 'Nonsensical artistic manifesto'
-													: profile.tone === 'sarcastic'
-														? 'Witty industry criticism'
-														: profile.tone === 'poetic'
-															? 'Lyrical artistic expression'
-															: profile.tone === 'mysterious'
-																? 'Cryptic creative hint'
-																: profile.tone === 'inspirational'
-																	? 'Motivational artistic journey'
-																	: profile.tone === 'nostalgic'
-																		? 'Wistful memory reflection'
-																		: profile.tone === 'humorous'
-																			? 'Clever music joke'
-																			: profile.tone === 'casual'
-																				? 'Laid-back studio update'
-																				: 'Detached creative observation'
+							: profile.tone === 'dramatic'
+								? 'Intense emotional revelation'
+								: profile.tone === 'romantic'
+									? 'Heartfelt love declaration'
+									: profile.tone === 'whimsical'
+										? 'Magical creative daydream'
+										: profile.tone === 'quirky'
+											? 'Oddly charming observation'
+											: profile.tone === 'absurd'
+												? 'Nonsensical artistic manifesto'
+												: profile.tone === 'sarcastic'
+													? 'Witty industry criticism'
+													: profile.tone === 'poetic'
+														? 'Lyrical artistic expression'
+														: profile.tone === 'mysterious'
+															? 'Cryptic creative hint'
+															: profile.tone === 'inspirational'
+																? 'Motivational artistic journey'
+																: profile.tone === 'nostalgic'
+																	? 'Wistful memory reflection'
+																	: profile.tone === 'humorous'
+																		? 'Clever music joke'
+																		: profile.tone === 'casual'
+																			? 'Laid-back studio update'
+																			: 'Detached creative observation'
 			}
 
 			- Variant 2: ${
@@ -137,33 +135,31 @@ export function useTwitter() {
 						? 'Playful observation'
 						: profile.tone === 'edgy'
 							? 'Rebellious or authentic take'
-							: profile.tone === 'stizzy off the galaxy gas'
-								? 'Reality-bending studio experiment'
-								: profile.tone === 'dramatic'
-									? 'Theatrical process reveal'
-									: profile.tone === 'romantic'
-										? 'Passionate music dedication'
-										: profile.tone === 'whimsical'
-											? 'Playful creative adventure'
-											: profile.tone === 'quirky'
-												? 'Unconventional studio moment'
-												: profile.tone === 'absurd'
-													? 'Surreal creative process'
-													: profile.tone === 'sarcastic'
-														? 'Deadpan music commentary'
-														: profile.tone === 'poetic'
-															? 'Metaphorical sound journey'
-															: profile.tone === 'mysterious'
-																? 'Enigmatic project tease'
-																: profile.tone === 'inspirational'
-																	? 'Uplifting creative message'
-																	: profile.tone === 'nostalgic'
-																		? 'Vintage sound exploration'
-																		: profile.tone === 'humorous'
-																			? 'Self-deprecating music humor'
-																			: profile.tone === 'casual'
-																				? 'Everyday creative moment'
-																				: 'Indifferent artistic update'
+							: profile.tone === 'dramatic'
+								? 'Theatrical process reveal'
+								: profile.tone === 'romantic'
+									? 'Passionate music dedication'
+									: profile.tone === 'whimsical'
+										? 'Playful creative adventure'
+										: profile.tone === 'quirky'
+											? 'Unconventional studio moment'
+											: profile.tone === 'absurd'
+												? 'Surreal creative process'
+												: profile.tone === 'sarcastic'
+													? 'Deadpan music commentary'
+													: profile.tone === 'poetic'
+														? 'Metaphorical sound journey'
+														: profile.tone === 'mysterious'
+															? 'Enigmatic project tease'
+															: profile.tone === 'inspirational'
+																? 'Uplifting creative message'
+																: profile.tone === 'nostalgic'
+																	? 'Vintage sound exploration'
+																	: profile.tone === 'humorous'
+																		? 'Self-deprecating music humor'
+																		: profile.tone === 'casual'
+																			? 'Everyday creative moment'
+																			: 'Indifferent artistic update'
 			}
 
 			- Variant 3: ${
@@ -173,33 +169,31 @@ export function useTwitter() {
 						? 'Light-hearted music content'
 						: profile.tone === 'edgy'
 							? 'Raw, unfiltered perspective'
-							: profile.tone === 'stizzy off the galaxy gas'
-								? 'Interdimensional fan appreciation'
-								: profile.tone === 'dramatic'
-									? 'Epic artistic declaration'
-									: profile.tone === 'romantic'
-										? 'Tender musical moment'
-										: profile.tone === 'whimsical'
-											? 'Fanciful sound experiment'
-											: profile.tone === 'quirky'
-												? 'Endearingly weird insight'
-												: profile.tone === 'absurd'
-													? 'Logic-defying creative statement'
-													: profile.tone === 'sarcastic'
-														? 'Mockingly appreciative post'
-														: profile.tone === 'poetic'
-															? 'Eloquent artistic meditation'
-															: profile.tone === 'mysterious'
-																? 'Shadowy creative revelation'
-																: profile.tone === 'inspirational'
-																	? 'Empowering artistic wisdom'
-																	: profile.tone === 'nostalgic'
-																		? 'Bittersweet musical memory'
-																		: profile.tone === 'humorous'
-																			? 'Absurd musical anecdote'
-																			: profile.tone === 'casual'
-																				? 'Chill creative sharing'
-																				: 'Emotionally distant content'
+							: profile.tone === 'dramatic'
+								? 'Epic artistic declaration'
+								: profile.tone === 'romantic'
+									? 'Tender musical moment'
+									: profile.tone === 'whimsical'
+										? 'Fanciful sound experiment'
+										: profile.tone === 'quirky'
+											? 'Endearingly weird insight'
+											: profile.tone === 'absurd'
+												? 'Logic-defying creative statement'
+												: profile.tone === 'sarcastic'
+													? 'Mockingly appreciative post'
+													: profile.tone === 'poetic'
+														? 'Eloquent artistic meditation'
+														: profile.tone === 'mysterious'
+															? 'Shadowy creative revelation'
+															: profile.tone === 'inspirational'
+																? 'Empowering artistic wisdom'
+																: profile.tone === 'nostalgic'
+																	? 'Bittersweet musical memory'
+																	: profile.tone === 'humorous'
+																		? 'Absurd musical anecdote'
+																		: profile.tone === 'casual'
+																			? 'Chill creative sharing'
+																			: 'Emotionally distant content'
 			}
 
 			Format your response as:
@@ -217,15 +211,7 @@ export function useTwitter() {
 		const results: string[] = []
 		let match: RegExpExecArray | null
 		while ((match = regex.exec(response)) !== null) {
-			let content = (match[2] || '').trim()
-			
-			// Clean up markdown formatting
-			content = content
-				.replace(/^\*\*|\*\*$/g, '') // Remove leading/trailing **
-				.replace(/^\*|\*$/g, '') // Remove leading/trailing *
-				.replace(/^"|}$/g, '') // Remove leading/trailing quotes
-				.trim()
-			
+			const content = (match[2] || '').trim()
 			if (content) results.push(content.substring(0, 280))
 			if (results.length >= 3) break
 		}
@@ -236,29 +222,13 @@ export function useTwitter() {
 				.map(s => s.trim())
 				.filter(Boolean)
 				.slice(0, 3)
-				.map(s => {
-					// Clean up markdown formatting for fallbacks too
-					const cleaned = s
-						.replace(/^\*\*|\*\*$/g, '') // Remove leading/trailing **
-						.replace(/^\*|\*$/g, '') // Remove leading/trailing *
-						.replace(/^"|}$/g, '') // Remove leading/trailing quotes
-						.trim()
-					return cleaned.substring(0, 280)
-				})
+				.map(s => s.substring(0, 280))
 			results.push(...fallback)
 		}
 		// Last resort: split on the word VARIANT regardless of format
 		if (results.length === 0 && /variant\s*\d+/i.test(response)) {
 			const parts = response.split(/variant\s*\d+\s*:?/i).map(s => s.trim()).filter(Boolean)
-			results.push(...parts.slice(0, 3).map(s => {
-				// Clean up markdown formatting for last resort too
-				const cleaned = s
-					.replace(/^\*\*|\*\*$/g, '') // Remove leading/trailing **
-					.replace(/^\*|\*$/g, '') // Remove leading/trailing *
-					.replace(/^"|}$/g, '') // Remove leading/trailing quotes
-					.trim()
-				return cleaned.substring(0, 280)
-			}))
+			results.push(...parts.slice(0, 3).map(s => s.substring(0, 280)))
 		}
 		return results.slice(0, 3)
 	}
