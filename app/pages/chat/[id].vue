@@ -146,6 +146,7 @@ const connectingTwitter = ref(false)
 const postingToTwitter = ref(false)
 const currentProfile = ref<TwitterProfile | null>(null)
 const latestSystemPrompt = ref<string | null>(null)
+const sendSystemPrompt = ref(false) // Flag to control when to send the prompt
 const input = ref('')
 
 const { data } = await useFetch(`/api/chats/${route.params.id}`, {
@@ -203,11 +204,14 @@ const chat = new Chat({
 		api: `/api/chats/${data.value.id}`,
 		body: () => ({
 			model: model.value,
-			system: latestSystemPrompt.value || undefined
+			// Only send system prompt when the flag is set
+			system: sendSystemPrompt.value ? latestSystemPrompt.value || undefined : undefined
 		})
 	}),
 	onFinish() {
 		refreshNuxtData('chats')
+		// Clear the flag after the message is sent
+		sendSystemPrompt.value = false
 	},
 	onError(error) {
 		const { message } = typeof error.message === 'string' && error.message[0] === '{' ? JSON.parse(error.message) : error
@@ -272,15 +276,15 @@ async function handleProfileSubmit(profile: TwitterProfile) {
 	const systemPrompt = twitter.generateSystemPrompt(profile)
 	latestSystemPrompt.value = systemPrompt
 
+	// Set flag to send the system prompt with the next message
+	sendSystemPrompt.value = true
+
 	// Send message to trigger post generation
 	// The system prompt will be sent via the transport body function
 	chat.sendMessage({ text: 'Generate 3 tweet variants.' })
 
-	// Clear the system prompt after sending (it will be used once)
-	// Use a small delay to ensure the message is sent first
-	setTimeout(() => {
-		latestSystemPrompt.value = null
-	}, 100)
+	// Note: We keep the system prompt in latestSystemPrompt so the inspector can display it
+	// It will be cleared when a new profile is submitted
 }
 
 async function handlePostSelect(post: string) {
@@ -316,13 +320,13 @@ function handleRegenerate() {
 		const systemPrompt = twitter.generateSystemPrompt(currentProfile.value)
 		latestSystemPrompt.value = systemPrompt
 
+		// Set flag to send the system prompt with the next message
+		sendSystemPrompt.value = true
+
 		// Send message to trigger post generation
 		chat.sendMessage({ text: 'Generate 3 tweet variants.' })
 
-		// Clear after sending
-		setTimeout(() => {
-			latestSystemPrompt.value = null
-		}, 100)
+		// Note: Keep the system prompt for the inspector
 	}
 }
 
