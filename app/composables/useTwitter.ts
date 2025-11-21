@@ -3,6 +3,35 @@ import type {
 	TwitterProfile
 } from '../../shared/types/twitter'
 
+// Maps each tone to [Variant1, Variant2, Variant3] descriptions
+const TONE_VARIANT_MAP: Record<string, [string, string, string]> = {
+	professional: [ 'Industry insight or achievement', 'Behind-the-scenes content', 'Gratitude or community focus' ],
+	fun: [ 'Relatable musician humor', 'Playful observation', 'Light-hearted music content' ],
+	edgy: [ 'Bold artistic statement', 'Rebellious or authentic take', 'Raw, unfiltered perspective' ],
+	dramatic: [ 'Intense emotional revelation', 'Theatrical process reveal', 'Epic artistic declaration' ],
+	romantic: [ 'Heartfelt love declaration', 'Passionate music dedication', 'Tender musical moment' ],
+	whimsical: [ 'Magical creative daydream', 'Playful creative adventure', 'Fanciful sound experiment' ],
+	quirky: [ 'Oddly charming observation', 'Unconventional studio moment', 'Endearingly weird insight' ],
+	absurd: [ 'Nonsensical artistic manifesto', 'Surreal creative process', 'Logic-defying creative statement' ],
+	sarcastic: [ 'Witty industry criticism', 'Deadpan music commentary', 'Mockingly appreciative post' ],
+	poetic: [ 'Lyrical artistic expression', 'Metaphorical sound journey', 'Eloquent artistic meditation' ],
+	mysterious: [ 'Cryptic creative hint', 'Enigmatic project tease', 'Shadowy creative revelation' ],
+	inspirational: [ 'Motivational artistic journey', 'Uplifting creative message', 'Empowering artistic wisdom' ],
+	nostalgic: [ 'Wistful memory reflection', 'Vintage sound exploration', 'Bittersweet musical memory' ],
+	humorous: [ 'Clever music joke', 'Self-deprecating music humor', 'Absurd musical anecdote' ],
+	casual: [ 'Laid-back studio update', 'Everyday creative moment', 'Chill creative sharing' ]
+}
+
+const DEFAULT_VARIANT_DESCRIPTIONS: [string, string, string] = [
+	'Detached creative observation',
+	'Indifferent artistic update',
+	'Emotionally distant content'
+]
+
+function getVariantDescription(tone: string, variantIndex: 0 | 1 | 2): string {
+	return TONE_VARIANT_MAP[tone]?.[variantIndex] ?? DEFAULT_VARIANT_DESCRIPTIONS[variantIndex]
+}
+
 export function useTwitter() {
 	const twitterConfig = ref<TwitterConfig>({
 		profile: {
@@ -94,107 +123,9 @@ export function useTwitter() {
 			5. Are authentic to a ${profile.age}-year-old ${profile.artistType} artist
 
 			Generate exactly 3 different post variants with different approaches:
-			- Variant 1: ${
-				profile.tone === 'professional'
-					? 'Industry insight or achievement'
-					: profile.tone === 'fun'
-						? 'Relatable musician humor'
-						: profile.tone === 'edgy'
-							? 'Bold artistic statement'
-							: profile.tone === 'dramatic'
-								? 'Intense emotional revelation'
-								: profile.tone === 'romantic'
-									? 'Heartfelt love declaration'
-									: profile.tone === 'whimsical'
-										? 'Magical creative daydream'
-										: profile.tone === 'quirky'
-											? 'Oddly charming observation'
-											: profile.tone === 'absurd'
-												? 'Nonsensical artistic manifesto'
-												: profile.tone === 'sarcastic'
-													? 'Witty industry criticism'
-													: profile.tone === 'poetic'
-														? 'Lyrical artistic expression'
-														: profile.tone === 'mysterious'
-															? 'Cryptic creative hint'
-															: profile.tone === 'inspirational'
-																? 'Motivational artistic journey'
-																: profile.tone === 'nostalgic'
-																	? 'Wistful memory reflection'
-																	: profile.tone === 'humorous'
-																		? 'Clever music joke'
-																		: profile.tone === 'casual'
-																			? 'Laid-back studio update'
-																			: 'Detached creative observation'
-			}
-
-			- Variant 2: ${
-				profile.tone === 'professional'
-					? 'Behind-the-scenes content'
-					: profile.tone === 'fun'
-						? 'Playful observation'
-						: profile.tone === 'edgy'
-							? 'Rebellious or authentic take'
-							: profile.tone === 'dramatic'
-								? 'Theatrical process reveal'
-								: profile.tone === 'romantic'
-									? 'Passionate music dedication'
-									: profile.tone === 'whimsical'
-										? 'Playful creative adventure'
-										: profile.tone === 'quirky'
-											? 'Unconventional studio moment'
-											: profile.tone === 'absurd'
-												? 'Surreal creative process'
-												: profile.tone === 'sarcastic'
-													? 'Deadpan music commentary'
-													: profile.tone === 'poetic'
-														? 'Metaphorical sound journey'
-														: profile.tone === 'mysterious'
-															? 'Enigmatic project tease'
-															: profile.tone === 'inspirational'
-																? 'Uplifting creative message'
-																: profile.tone === 'nostalgic'
-																	? 'Vintage sound exploration'
-																	: profile.tone === 'humorous'
-																		? 'Self-deprecating music humor'
-																		: profile.tone === 'casual'
-																			? 'Everyday creative moment'
-																			: 'Indifferent artistic update'
-			}
-
-			- Variant 3: ${
-				profile.tone === 'professional'
-					? 'Gratitude or community focus'
-					: profile.tone === 'fun'
-						? 'Light-hearted music content'
-						: profile.tone === 'edgy'
-							? 'Raw, unfiltered perspective'
-							: profile.tone === 'dramatic'
-								? 'Epic artistic declaration'
-								: profile.tone === 'romantic'
-									? 'Tender musical moment'
-									: profile.tone === 'whimsical'
-										? 'Fanciful sound experiment'
-										: profile.tone === 'quirky'
-											? 'Endearingly weird insight'
-											: profile.tone === 'absurd'
-												? 'Logic-defying creative statement'
-												: profile.tone === 'sarcastic'
-													? 'Mockingly appreciative post'
-													: profile.tone === 'poetic'
-														? 'Eloquent artistic meditation'
-														: profile.tone === 'mysterious'
-															? 'Shadowy creative revelation'
-															: profile.tone === 'inspirational'
-																? 'Empowering artistic wisdom'
-																: profile.tone === 'nostalgic'
-																	? 'Bittersweet musical memory'
-																	: profile.tone === 'humorous'
-																		? 'Absurd musical anecdote'
-																		: profile.tone === 'casual'
-																			? 'Chill creative sharing'
-																			: 'Emotionally distant content'
-			}
+			- Variant 1: ${getVariantDescription(profile.tone, 0)}
+			- Variant 2: ${getVariantDescription(profile.tone, 1)}
+			- Variant 3: ${getVariantDescription(profile.tone, 2)}
 
 			Format your response as:
 			VARIANT 1: [post content]

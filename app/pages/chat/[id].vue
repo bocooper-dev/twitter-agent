@@ -283,7 +283,7 @@ async function handleProfileSubmit(profile: TwitterProfile) {
 	// The system prompt will be sent via the transport body function
 	chat.sendMessage({ text: 'Generate 3 tweet variants.' })
 
-	// Note: We keep the system prompt in latestSystemPrompt so the inspector can display it
+	// NOTE: We keep the system prompt in latestSystemPrompt so the inspector can display it
 	// It will be cleared when a new profile is submitted
 }
 
@@ -326,7 +326,7 @@ function handleRegenerate() {
 		// Send message to trigger post generation
 		chat.sendMessage({ text: 'Generate 3 tweet variants.' })
 
-		// Note: Keep the system prompt for the inspector
+		// NOTE: Keep the system prompt for the inspector
 	}
 }
 

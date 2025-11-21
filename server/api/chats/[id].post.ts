@@ -1,12 +1,12 @@
 import { gateway } from '@ai-sdk/gateway'
 import type { UIMessage } from 'ai'
 import {
-  convertToModelMessages,
-  createUIMessageStream,
-  createUIMessageStreamResponse,
-  generateObject,
-  generateText,
-  streamText
+	convertToModelMessages,
+	createUIMessageStream,
+	createUIMessageStreamResponse,
+	generateObject,
+	generateText,
+	streamText
 } from 'ai'
 import { z } from 'zod'
 

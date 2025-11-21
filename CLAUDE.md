@@ -76,8 +76,6 @@ pnpm db:migrate   # Apply migrations to database
 
 ```
 twitter-agent/
-├── .agent-prompts/        # AI agent system prompts
-│   └── twitter-api-agent.md # Twitter API integration assistant prompt
 ├── app/                    # Vue application layer
 │   ├── assets/            # Static assets
 │   │   └── css/          # Global styles
@@ -245,6 +243,11 @@ TWITTER_API_KEY=""
 TWITTER_API_SECRET=""
 TWITTER_ACCESS_TOKEN=""
 TWITTER_ACCESS_TOKEN_SECRET=""
+TWITTER_CALLBACK_URL="http://localhost:3000/api/auth/twitter/callback"
+TWITTER_OAUTH2_CLIENT_ID=""
+TWITTER_OAUTH2_CLIENT_SECRET=""
+TWITTER_DEV_APP_ID=""
+TWITTER_DEV_APP_NAME=""
 ```
 
 ## Code Style & Linting
@@ -329,20 +332,6 @@ Key configuration in `nuxt.config.ts`:
 4. **API Testing**: Nitro provides OpenAPI docs in development
 5. **Component Preview**: Use Nuxt DevTools for component inspection
 6. **Performance**: Leverage view transitions for smooth navigation
-
-## Agent Prompts
-
-The `.agent-prompts/` directory contains specialized system prompts for AI assistants working with this codebase:
-
-### twitter-api-agent.md
-A specialized assistant prompt for implementing Twitter API v2 integration in the Nuxt 4 application. This agent:
-- Has access to Twitter API documentation via context7 MCP
-- Follows project-specific code style (no semicolons, proper Vue formatting)
-- Provides complete working examples with authentication
-- Includes both client and server-side implementation patterns
-- Handles error cases and rate limiting
-
-Use this prompt when working on Twitter API features to ensure consistent implementation patterns.
 
 ## Troubleshooting
 

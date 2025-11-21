@@ -1,64 +1,72 @@
-# Nuxt AI Chatbot Template
+# Twitter Auto-Poster AI Agent for Musicians
 
 [![Nuxt UI](https://img.shields.io/badge/Made%20with-Nuxt%20UI-00DC82?logo=nuxt&labelColor=020420)](https://ui.nuxt.com)
 
-Full-featured AI Chatbot Nuxt application with authentication, chat history, multiple pages, collapsible sidebar, keyboard shortcuts, light & dark mode, command palette and more. Built using [Nuxt UI](https://ui.nuxt.com) components and integrated with [AI SDK v5](https://sdk.vercel.ai) for a complete chat experience.
-
-- [Live demo](https://chat-template.nuxt.dev/)
-- [Documentation](https://ui4.nuxt.com/docs/getting-started/installation/nuxt)
-
-<a href="https://chat-template.nuxt.dev/" target="_blank">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://ui4.nuxt.com/assets/templates/nuxt/chat-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://ui4.nuxt.com/assets/templates/nuxt/chat-light.png">
-    <img alt="Nuxt AI Chatbot Template" src="https://ui4.nuxt.com/assets/templates/nuxt/chat-light.png">
-  </picture>
-</a>
+An AI-powered Twitter content generator designed specifically for musicians. Configure your artist profile once, and the AI generates authentic, on-brand tweets that match your voice, genre, and target audience. Select your favorite from 3 variants and post directly to Twitter.
 
 ## Features
 
-- ⚡️ **Streaming AI messages** powered by the [AI SDK v5](https://sdk.vercel.ai)
-- 🤖 **Multiple model support** via various AI providers with built-in AI Gateway support
-- 🔐 **Authentication** via [nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils)
-- 💾 **Chat history persistence** using PostgreSQL database and [Drizzle ORM](https://orm.drizzle.team)
-- 🚀 **Easy deploy** to Vercel with zero configuration
+- **Artist Profile System** - Configure your genre, age, instruments, target audience, and voice tone
+- **16 Voice Tones** - Professional, fun, edgy, dramatic, romantic, whimsical, quirky, absurd, sarcastic, poetic, mysterious, inspirational, nostalgic, humorous, casual, or apathetic
+- **3 Tweet Variants** - Each generation produces 3 unique approaches based on your tone
+- **Twitter Integration** - OAuth authentication and one-click posting
+- **Chat Interface** - Conversational flow for generating and refining content
+- **Multiple AI Models** - Powered by [AI SDK v5](https://sdk.vercel.ai) with Vercel AI Gateway support
 
-## Quick Start
+## How It Works
 
-```bash
-npx nuxi@latest init -t github:nuxt-ui-templates/chat
-```
+1. **Start a Chat** - Create a new conversation
+2. **Configure Profile** - Fill out your artist profile (genre, instruments, audience, tone)
+3. **Generate Tweets** - AI creates 3 tweet variants tailored to your voice
+4. **Select & Post** - Pick your favorite and post directly to Twitter
 
-## Deploy your own
+## Tech Stack
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnuxt-ui-templates%2Fchat&env=NUXT_SESSION_PASSWORD,NUXT_OAUTH_GITHUB_CLIENT_ID,NUXT_OAUTH_GITHUB_CLIENT_SECRET,DATABASE_URL&demo-url=https%3A%2F%2Fchat-template.nuxt.dev%2F)
+- **Framework**: [Nuxt 4](https://nuxt.com) with Vue 3
+- **UI**: [Nuxt UI v4](https://ui.nuxt.com)
+- **AI**: [AI SDK v5](https://sdk.vercel.ai) with Vercel AI Gateway
+- **Twitter**: [twitter-api-v2](https://github.com/PLhery/node-twitter-api-v2)
+- **Database**: PostgreSQL with [Drizzle ORM](https://orm.drizzle.team)
+- **Auth**: [nuxt-auth-utils](https://github.com/atinux/nuxt-auth-utils)
 
 ## Setup
 
-Make sure to install the dependencies:
+Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-Set up your environment variables by creating a `.env` file:
+Create a `.env` file with your configuration:
 
 ```env
+# Session Password (min 32 characters)
+NUXT_SESSION_PASSWORD=a_strong_random_password_with_min_32_characters
+
 # Database
-DATABASE_URL=<your-postgresql-database-url>
+DATABASE_URL=your_postgresql_database_url
 
-# GitHub OAuth (optional, for authentication)
-NUXT_OAUTH_GITHUB_CLIENT_ID=<your-github-oauth-app-client-id>
-NUXT_OAUTH_GITHUB_CLIENT_SECRET=<your-github-oauth-app-client-secret>
+# GitHub OAuth (optional, for user authentication)
+NUXT_OAUTH_GITHUB_CLIENT_ID=your_github_oauth_app_client_id
+NUXT_OAUTH_GITHUB_CLIENT_SECRET=your_github_oauth_app_client_secret
 
-# AI Configuration via Vercel AI Gateway (unified API for all providers)
-AI_GATEWAY_API_KEY=<your-vercel-ai-gateway-api-key>
+# AI Configuration via Vercel AI Gateway
+AI_GATEWAY_API_KEY=your_vercel_ai_gateway_api_key
+
+# Twitter API Credentials
+TWITTER_API_KEY=your_twitter_api_key
+TWITTER_API_SECRET=your_twitter_api_secret
+TWITTER_ACCESS_TOKEN=your_twitter_access_token
+TWITTER_ACCESS_TOKEN_SECRET=your_twitter_access_token_secret
+TWITTER_CALLBACK_URL=http://localhost:3000/api/auth/twitter/callback
+
+# Twitter API - used in Twitter Developer Portal/Vercel config, kept here for reference
+TWITTER_BEARER_TOKEN=your_twitter_bearer_token
+TWITTER_OAUTH2_CLIENT_ID=your_twitter_oauth2_client_id
+TWITTER_OAUTH2_CLIENT_SECRET=your_twitter_oauth2_client_secret
+TWITTER_DEV_APP_ID=your_twitter_dev_app_id
+TWITTER_DEV_APP_NAME=your_twitter_dev_app_name
 ```
-
-> [!TIP]
-> With [Vercel AI Gateway](https://vercel.com/docs/ai-gateway), you don't need individual API keys for OpenAI, Anthropic, etc. The AI Gateway provides a unified API to access hundreds of models through a single endpoint with automatic load balancing, fallbacks, and spend monitoring.
-
-To add authentication with GitHub, you need to [create a GitHub OAuth application](https://github.com/settings/applications/new).
 
 Run database migrations:
 
@@ -76,25 +84,19 @@ pnpm dev
 
 ## Production
 
-Build the application for production:
+Build the application:
 
 ```bash
 pnpm build
 ```
 
-Locally preview production build:
+Preview production build:
 
 ```bash
 pnpm preview
 ```
 
-Deploy to Vercel:
-
-```bash
-npx vercel
-```
-
-Or connect your repository to Vercel for automatic deployments:
+Repository is connected to Vercel for automatic deployments:
 
 1. Push your code to GitHub
 2. Connect your repository to [Vercel](https://vercel.com)
@@ -115,13 +117,17 @@ Simply configure your `AI_GATEWAY_API_KEY` in your Vercel environment variables 
 
 ## AI Gateway Setup
 
+The app uses [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) for unified access to multiple AI providers:
+
 1. Create a Vercel account at [vercel.com](https://vercel.com)
 2. Navigate to your [AI Gateway settings](https://vercel.com/dashboard/ai-gateway)
-3. Generate an API key for your project
-4. Add the key to your environment variables as `AI_GATEWAY_API_KEY`
+3. Generate an API key
+4. Add the key to your environment as `AI_GATEWAY_API_KEY`
 
-The AI Gateway automatically handles authentication with all supported AI providers including OpenAI, Anthropic, Google, xAI, and many others.
+## Twitter API Setup
 
-## Renovate integration
-
-Install [Renovate GitHub app](https://github.com/apps/renovate/installations/select_target) on your repository and you are good to go.
+1. Create a Twitter Developer account at [developer.twitter.com](https://developer.twitter.com)
+2. Create a new app in the Developer Portal
+3. Enable OAuth 1.0a with read and write permissions
+4. Set the callback URL to `http://localhost:3000/api/auth/twitter/callback`
+5. Copy your API keys and tokens to the `.env` file
